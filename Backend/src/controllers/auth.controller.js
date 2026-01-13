@@ -5,13 +5,14 @@ import bcrypt from "bcryptjs";
 export const register = async (req, res) => {
   const { name, email, password, image, role } = req.body;
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email }).select("+password");
     if (existingUser) {
       return res
         .status(400)
         .json({ sucess: false, message: "User already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(hashedPassword);
 
     const newUser = await User.create({
       name,
@@ -50,13 +51,14 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
       return res.status(400).json({ sucess: false, message: "User not found" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log(isPasswordValid);
 
     if (!isPasswordValid) {
       return res
